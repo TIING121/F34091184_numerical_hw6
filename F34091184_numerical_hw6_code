@@ -1,0 +1,77 @@
+import numpy as np
+from scipy.linalg import lu, solve, inv
+
+print("\n--------------------第一題--------------------")
+
+A1 = np.array([
+    [1.19, 2.11, -100.0, 1.0],
+    [14.2, -0.112, 12.2, -1.0],
+    [0.0, 100.0, -99.9, 1.0],
+    [15.3, 0.110, -13.1, -1.0]
+], dtype=float)
+b1 = np.array([1.12, 3.44, 2.15, 4.16], dtype=float)
+n = len(b1)
+
+for k in range(n):
+    max_row = np.argmax(np.abs(A1[k:, k])) + k
+    if k != max_row:
+        A1[[k, max_row]] = A1[[max_row, k]]
+        b1[[k, max_row]] = b1[[max_row, k]]
+
+    for i in range(k+1, n):
+        factor = A1[i, k] / A1[k, k]
+        A1[i, k:] -= factor * A1[k, k:]
+        b1[i] -= factor * b1[k]
+
+x1 = np.zeros(n)
+for i in range(n-1, -1, -1):
+    x1[i] = (b1[i] - np.dot(A1[i, i+1:], x1[i+1:])) / A1[i, i]
+
+for i, val in enumerate(x1, 1):
+    print(f"x{i} = {val:.5f}")
+
+print()
+print("\n--------------------第二題--------------------")
+
+A2 = np.array([
+    [4, 1, -1, 0],
+    [1, 3, -1, 0],
+    [-1, -1, 6, 2],
+    [0, 0, 2, 5]
+])
+A2_inv = inv(A2)
+
+print("\ninverse of the matrix A = ")
+print(np.round(A2_inv, 5))
+
+print()
+print("\n--------------------第三題--------------------")
+
+A3 = np.array([
+    [3, -1, 0, 0],
+    [-1, 3, -1, 0],
+    [0, -1, 3, -1],
+    [0, 0, -1, 3]
+])
+b3 = np.array([2, 3, 4, 1])
+n = len(b3)
+L = np.zeros((n, n))
+U = np.eye(n)
+
+for j in range(n):
+    for i in range(j, n):
+        L[i, j] = A3[i, j] - sum(L[i, k] * U[k, j] for k in range(j))
+    for i in range(j + 1, n):
+        U[j, i] = (A3[j, i] - sum(L[j, k] * U[k, i] for k in range(j))) / L[j, j]
+
+y3 = np.zeros(n)
+for i in range(n):
+    y3[i] = (b3[i] - np.dot(L[i, :i], y3[:i])) / L[i, i]
+
+x3 = np.zeros(n)
+for i in reversed(range(n)):
+    x3[i] = (y3[i] - np.dot(U[i, i+1:], x3[i+1:]))
+
+print("\nProblem 3: Crout factorization solution")
+for i, val in enumerate(x3, 1):
+    print(f"x{i} = {val:.5f}")
